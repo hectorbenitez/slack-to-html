@@ -61,6 +61,16 @@ describe('control sequences', () => {
     })
   })
 
+  describe('phone links', () => {
+    it('should render a tel anchor tag', () => {
+      escapeForSlack('<tel:123-456-7890>').should.equal('<a href="tel:123-456-7890">123-456-7890</a>')
+    })
+
+    it('should render the label in the tel anchor tag if present', () => {
+      escapeForSlack('<tel:123-456-7890|Call me!>').should.equal('<a href="tel:123-456-7890">Call me!</a>')
+    })
+  })
+
   describe('commands', () => {
     describe('known commands', () => {
       ['here', 'channel', 'group', 'everyone'].map((command) => {

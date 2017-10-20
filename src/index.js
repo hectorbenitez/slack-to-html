@@ -5,7 +5,7 @@ import emoji from './emoji'
 
 const expandEmoji = (text, customEmoji) => {
   const allEmoji = Object.assign({}, emoji, customEmoji)
-  return text.replace(/:(\S+):/, ((match, originalKey) => {
+  return text.replace(/:(\S+):/g, ((match, originalKey) => {
     const aliasPattern = /alias:(\S+)/
     let key = originalKey
     let emojiValue
@@ -20,9 +20,9 @@ const expandEmoji = (text, customEmoji) => {
 
     if (key && emojiValue) {
       if (emojiValue.match(/https?:\/\/\S+/)) {
-        return `<img alt="${originalKey}" src="${emojiValue}" class="slack_emoji" />`
+        return `<img alt="${originalKey}" src="${emojiValue}" title=":${originalKey}:" class="slack_emoji" />`
       }
-      return emojiValue.split('-').map((emojiCode) => (`&#x${emojiCode}`)).join('')
+      return emojiValue.split('-').map((emojiCode) => (`<span title=":${originalKey}:">&#x${emojiCode}</span>`)).join('')
     }
     return originalKey
   }))
@@ -46,6 +46,7 @@ const userMentionRegExp = XRegExp.cache('<@(((?<userID>U[^|>]+)(\\|(?<userName>[
 const channelMentionRegExp = XRegExp.cache('<#(((?<channelID>C[^|>]+)(\\|(?<channelName>[^>]+))?)|(?<channelNameWithoutID>[^>]+))>', 'ng')
 const linkRegExp = XRegExp.cache('<(?<linkUrl>https?:[^|>]+)(\\|(?<linkHtml>[^>]+))?>', 'ng')
 const mailToRegExp = XRegExp.cache('<mailto:(?<mailTo>[^|>]+)(\\|(?<mailToName>[^>]+))?>', 'ng')
+const telRegExp = XRegExp.cache('<tel:(?<tel>[^|>]+)(\\|(?<telName>[^>]+))?>', 'ng')
 const subteamCommandRegExp = XRegExp.cache('<!subteam\\^(?<subteamID>S[^|>]+)(\\|(?<subteamName>[^>]+))?>', 'ng')
 const commandRegExp = XRegExp.cache('<!(?<commandLiteral>[^|>]+)(\\|(?<commandName>[^>]+))?>', 'ng')
 const knownCommands = ['here', 'channel', 'group', 'everyone']
@@ -249,6 +250,7 @@ const escapeForSlack = (text, options = {}) => {
       [channelMentionRegExp, replaceChannelName(channels)],
       [linkRegExp, ((match) => (`<a href="${match.linkUrl}" target="_blank" rel="noopener noreferrer">${match.linkHtml || match.linkUrl}</a>`))],
       [mailToRegExp, ((match) => (`<a href="mailto:${match.mailTo}" target="_blank" rel="noopener noreferrer">${match.mailToName || match.mailTo}</a>`))],
+      [telRegExp, ((match) => (`<a href="tel:${match.tel}">${match.telName || match.tel}</a>`))],
       [subteamCommandRegExp, replaceUserGroupName(usergroups)],
       [commandRegExp, ((match) => {
         if (match.commandLiteral && match.commandLiteral.startsWith('subteam')) {
@@ -275,6 +277,7 @@ const buildSlackHawkDownRegExps = () => {
     channelMentionRegExp: channelMentionRegExp,
     linkRegExp: linkRegExp,
     mailToRegExp: mailToRegExp,
+    telRegExp: telRegExp,
     subteamCommandRegExp: subteamCommandRegExp,
     boldOpeningDelimiterRegExp: buildOpeningDelimiterRegExp('*'),
     boldClosingDelimiterRegExp: buildClosingDelimiterRegExp('*'),

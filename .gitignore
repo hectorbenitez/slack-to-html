@@ -1,4 +1,4 @@
 node_modules
-dist
+dist/emoji.js
 src/emoji.js
 npm-debug.log
