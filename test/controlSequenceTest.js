@@ -3,11 +3,11 @@ import { escapeForSlack } from '../src/index.js'
 describe('control sequences', () => {
   describe('user mentions', () => {
     it('should render the label', () => {
-      escapeForSlack('<@U123|someone>').should.equal('@someone')
+      escapeForSlack('<@U123|someone>').should.equal('<span class="user-mention">@someone</span>')
     })
 
     it('should render the user name if present', () => {
-      escapeForSlack('<@U123>', { users: { U123: 'someone' } }).should.equal('@someone')
+      escapeForSlack('<@U123>', { users: { U123: 'someone' } }).should.equal('<span class="user-mention">@someone</span>')
     })
 
     it('should render the original value if user name is not present', () => {
@@ -15,11 +15,11 @@ describe('control sequences', () => {
     })
 
     it('should render the fallback text', () => {
-      escapeForSlack('<@U123|someone>').should.equal('@someone')
+      escapeForSlack('<@U123|someone>').should.equal('<span class="user-mention">@someone</span>')
     })
 
     it('should render the username literal', () => {
-      escapeForSlack('<@someone>').should.equal('@someone')
+      escapeForSlack('<@someone>').should.equal('<span class="user-mention">@someone</span>')
     })
   })
 

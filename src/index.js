@@ -56,7 +56,7 @@ const escapeTags = (string) => (['&lt;', string.substring(1, string.length - 1),
 const replaceUserName = (users) => ((match) => {
   const userName = match.userName || match.userNameWithoutID || (match.userID && users && users[match.userID])
   if (userName) {
-    return (`@${userName}`)
+    return (`<span class="user-mention">@${userName}</span>`)
   }
   return escapeTags(match.toString())
 })
