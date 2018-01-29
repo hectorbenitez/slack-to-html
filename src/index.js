@@ -77,10 +77,10 @@ const replaceUserGroupName = (usergroups) => ((match) => {
   return escapeTags(match.toString())
 })
 
-const buildOpeningDelimiterRegExp = (delimiter, { spacePadded = false, escapeDelimiter = true } = {}) => {
+const buildOpeningDelimiterRegExp = (delimiter, { prefixPattern = '', spacePadded = false, escapeDelimiter = true } = {}) => {
   const escapedDelimiter = escapeDelimiter ? XRegExp.escape(delimiter) : delimiter
   return XRegExp.cache(
-    `${spacePadded ? '(?<openingCapturedWhitespace>^|\\s)' : ''}${escapedDelimiter}`,
+    `${spacePadded ? '(?<openingCapturedWhitespace>^|\\s)' : ''}${prefixPattern}${escapedDelimiter}`,
     'ns'
   )
 }
@@ -119,7 +119,7 @@ const replaceInWindows = (
   const replaceNewlines = options.replaceNewlines
   let maxReplacements = options.maxReplacements
 
-  const openingDelimiterRegExp = buildOpeningDelimiterRegExp(delimiterLiteral, { spacePadded })
+  const openingDelimiterRegExp = buildOpeningDelimiterRegExp(delimiterLiteral, { spacePadded, prefixPattern: options.prefixPattern })
   const closingDelimiterRegExp = asymmetric ? buildClosingDelimiterRegExp(options.endingPattern, { escapeDelimiter: false }) : buildClosingDelimiterRegExp(delimiterLiteral, { spacePadded })
 
   if (tagWindowIndex >= closedTagWindows.length || (maxReplacements && maxReplacements <= 0)) {
@@ -230,8 +230,8 @@ const expandText = (text) => {
   expandedTextAndWindows = replaceInWindows(expandedTextAndWindows.text, '*', boldOpeningPatternString, closingSpanPatternString, expandedTextAndWindows.windows, { maxReplacements: 100 })
   expandedTextAndWindows = replaceInWindows(expandedTextAndWindows.text, '~', strikethroughOpeningPatternString, closingSpanPatternString, expandedTextAndWindows.windows, { maxReplacements: 100 })
   expandedTextAndWindows = replaceInWindows(expandedTextAndWindows.text, '_', italicOpeningPatternString, closingSpanPatternString, expandedTextAndWindows.windows, { spacePadded: true, maxReplacements: 100 })
-  expandedTextAndWindows = replaceInWindows(expandedTextAndWindows.text, '&gt;&gt;&gt;', blockDivOpeningPatternString, closingDivPatternString, expandedTextAndWindows.windows, { endingPattern: '$', replaceNewlines: true, maxReplacements: 100 })
-  expandedTextAndWindows = replaceInWindows(expandedTextAndWindows.text, '&gt;', blockSpanOpeningPatternString, closingSpanPatternString, expandedTextAndWindows.windows, { endingPattern: '\\n|$', maxReplacements: 100 })
+  expandedTextAndWindows = replaceInWindows(expandedTextAndWindows.text, '&gt;&gt;&gt;', blockDivOpeningPatternString, closingDivPatternString, expandedTextAndWindows.windows, { prefixPattern: '^\\s*', endingPattern: '$', replaceNewlines: true, maxReplacements: 100 })
+  expandedTextAndWindows = replaceInWindows(expandedTextAndWindows.text, '&gt;', blockSpanOpeningPatternString, closingSpanPatternString, expandedTextAndWindows.windows, { prefixPattern: '^\\s*', endingPattern: '\\n|$', maxReplacements: 100 })
 
   return expandedTextAndWindows.text
 }
