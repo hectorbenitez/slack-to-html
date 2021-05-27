@@ -1,7 +1,7 @@
 {
-  "name": "slack-hawk-down",
-  "version": "0.3.4",
-  "description": "Render Slack flavored markdown as HTML",
+  "name": "slack-to-html",
+  "version": "1.0.0",
+  "description": "Render Slack markdown as HTML",
   "main": "dist/bundle.js",
   "scripts": {
     "update-emoji": "node updateEmoji.js",
@@ -15,18 +15,17 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/swiftype/slack-hawk-down.git"
+    "url": "git+https://github.com/hectorbenitez/slack-to-html.git"
   },
   "keywords": [
     "slack",
     "markdown"
   ],
-  "author": "Alec Hoey",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/swiftype/slack-hawk-down/issues"
+    "url": "https://github.com/hectorbenitez/slack-to-html/issues"
   },
-  "homepage": "https://github.com/swiftype/slack-hawk-down#readme",
+  "homepage": "https://github.com/hectorbenitez/slack-to-html#readme",
   "dependencies": {
     "xregexp": "^3.2.0"
   },

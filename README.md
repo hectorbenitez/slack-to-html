@@ -1,10 +1,12 @@
-# <img src="slack_hawk_down.png" width="100px" /> Slack Hawk Down
+# Slack to HTML
 
-Slack-flavored markdown as HTML
+Forked originally from https://github.com/swiftype/slack-hawk-down
+
+Slack markdown to HTML
 
 ## Installation
 ```
-npm install --save slack-hawk-down
+npm install --save slack-to-html
 ```
 
 ## Usage
