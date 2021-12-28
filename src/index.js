@@ -34,6 +34,8 @@ const closingDivPatternString = '</div>'
 const closingSpanPatternString = '</span>'
 const codeDivOpeningPatternString = '<div class="slack_code">'
 const codeSpanOpeningPatternString = '<span class="slack_code">'
+const openingCodePatternString = "<code>";
+const closingCodePatternString = "</code>";
 const boldOpeningPatternString = '<span class="slack_bold">'
 const strikethroughOpeningPatternString = '<span class="slack_strikethrough">'
 const italicOpeningPatternString = '<span class="slack_italics">'
@@ -227,8 +229,8 @@ const replaceInWindows = (
 const expandText = (text) => {
   let expandedTextAndWindows
   expandedTextAndWindows = { text: text, windows: [[0, text.length]] }
-  expandedTextAndWindows = replaceInWindows(expandedTextAndWindows.text, '```', codeDivOpeningPatternString, closingDivPatternString, expandedTextAndWindows.windows, { partitionWindowOnMatch: true, replaceNewlines: true })
-  expandedTextAndWindows = replaceInWindows(expandedTextAndWindows.text, '`', codeSpanOpeningPatternString, closingSpanPatternString, expandedTextAndWindows.windows, { partitionWindowOnMatch: true })
+  expandedTextAndWindows = replaceInWindows(expandedTextAndWindows.text, '```', codeDivOpeningPatternString + openingCodePatternString, closingCodePatternString + closingDivPatternString, expandedTextAndWindows.windows, { partitionWindowOnMatch: true, replaceNewlines: true })
+  expandedTextAndWindows = replaceInWindows(expandedTextAndWindows.text, '`', codeSpanOpeningPatternString + openingCodePatternString, closingCodePatternString + closingSpanPatternString, expandedTextAndWindows.windows, { partitionWindowOnMatch: true })
   expandedTextAndWindows = replaceInWindows(expandedTextAndWindows.text, '*', boldOpeningPatternString, closingSpanPatternString, expandedTextAndWindows.windows, { maxReplacements: 100 })
   expandedTextAndWindows = replaceInWindows(expandedTextAndWindows.text, '~', strikethroughOpeningPatternString, closingSpanPatternString, expandedTextAndWindows.windows, { maxReplacements: 100 })
   expandedTextAndWindows = replaceInWindows(expandedTextAndWindows.text, '_', italicOpeningPatternString, closingSpanPatternString, expandedTextAndWindows.windows, { spacePadded: true, maxReplacements: 100 })
