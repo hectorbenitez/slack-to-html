@@ -23,7 +23,7 @@ const expandEmoji = (text, customEmoji) => {
         return `<img alt="${originalKey}" src="${emojiValue}" title=":${originalKey}:" class="slack_emoji" />`
       }
 
-      const emojiHtml = emojiValue.split('-').map((emojiCode) => (`&#x${emojiCode}`)).join('')
+      const emojiHtml = emojiValue.split('-').map((emojiCode) => (`&#x${emojiCode};`)).join('')
       return `<span title=":${originalKey}:">${emojiHtml}</span>`
     }
     return originalKey
