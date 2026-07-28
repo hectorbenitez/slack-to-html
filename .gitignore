@@ -1,4 +1,7 @@
 node_modules
-dist/emoji.js
-src/emoji.js
-npm-debug.log
+dist
+coverage
+packed
+*.tgz
+npm-debug.log*
+.DS_Store

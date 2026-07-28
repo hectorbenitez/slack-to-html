@@ -1,0 +1,103 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# The build tooling needs Node 22+, while the published package supports the
+# `engines` range. Development jobs therefore run on a current Node, and the
+# `compat` job checks the built artifact across every supported version.
+env:
+  TOOLCHAIN_NODE_VERSION: 24
+
+jobs:
+  lint:
+    name: Lint and typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ env.TOOLCHAIN_NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - run: npm run format:check
+      - run: npm run lint
+      - run: npm run typecheck
+
+  test:
+    name: Test on Node ${{ matrix.node }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [22, 24]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci
+      - run: npm test
+
+  build:
+    name: Build and validate package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ env.TOOLCHAIN_NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - run: npm run check:package
+      # The emoji map is generated and committed; fail if it drifted.
+      - run: npm run generate-emoji
+      - name: Verify the committed emoji map is up to date
+        run: git diff --exit-code src/emojiData.ts
+      - name: Pack the package
+        run: mkdir -p packed && npm pack --pack-destination ./packed
+      - uses: actions/upload-artifact@v5
+        with:
+          name: package-tarball
+          path: packed/*.tgz
+          retention-days: 7
+
+  compat:
+    name: Consume the package on Node ${{ matrix.node }}
+    needs: build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [20, 22, 24]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ matrix.node }}
+      - uses: actions/download-artifact@v5
+        with:
+          name: package-tarball
+          path: packed
+      - name: Install the tarball into a scratch project
+        run: |
+          mkdir -p /tmp/consumer
+          cd /tmp/consumer
+          npm init -y > /dev/null
+          npm install "$GITHUB_WORKSPACE"/packed/*.tgz
+      - name: Run the smoke test
+        run: |
+          cp scripts/smokeTest.mjs /tmp/consumer/
+          cd /tmp/consumer
+          node smokeTest.mjs
