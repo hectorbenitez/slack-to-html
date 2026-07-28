@@ -3,6 +3,26 @@
 All notable changes to this project are documented here. This project follows
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 2.0.1
+
+No change in output. Verified byte-identical to 2.0.0 over the golden corpus and
+4,000 generated inputs.
+
+### Performance
+
+- A markdown pass now returns immediately when the text cannot contain its
+  delimiter, and a delimiter scan is reused by the following windows while it is
+  still the first match at or after their start. The inline code pass splits the
+  text into one window per code span, and every later pass previously scanned to
+  the end of the text once per window. On a message of 2,000 inline code spans
+  this drops from 111ms to 24ms.
+
+### Internal
+
+- Added `npm run fuzz:capture` and `npm run fuzz:compare`, which generate inputs
+  from a fixed seed and compare a change against what the code produced
+  beforehand. Changes to the delimiter matcher should be checked with it.
+
 ## 2.0.0
 
 A full modernization of the package. The two public functions and their options
