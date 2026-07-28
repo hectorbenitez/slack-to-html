@@ -82,6 +82,7 @@
     "@vitest/coverage-v8": "^4.1.10",
     "emoji-datasource": "^16.0.0",
     "eslint": "^10.8.0",
+    "globals": "^17.8.0",
     "prettier": "^3.9.6",
     "publint": "^0.3.22",
     "tsdown": "^0.22.14",

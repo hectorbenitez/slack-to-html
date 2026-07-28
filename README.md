@@ -249,6 +249,11 @@ npm run build         # tsdown: ESM, CJS, UMD and .d.ts
 npm run generate-emoji  # regenerate src/emojiData.ts from emoji-datasource
 ```
 
+The build tooling requires Node 22 or newer, even though the published package
+supports Node 20.19+. CI enforces the difference: it runs the tooling on a current
+Node, then installs the packed tarball and runs `scripts/smokeTest.mjs` against
+every Node version in `engines`.
+
 `test/fixtures/golden.json` is a snapshot of 1.x's output over a broad corpus of
 inputs. `test/golden.test.ts` asserts the current implementation still matches it,
 with every deliberate difference listed explicitly, so behavior cannot drift by

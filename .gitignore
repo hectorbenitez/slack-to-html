@@ -1,6 +1,7 @@
 node_modules
 dist
 coverage
+packed
 *.tgz
 npm-debug.log*
 .DS_Store

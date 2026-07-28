@@ -81,9 +81,11 @@ keep the same names, so most code needs no changes; see the
 - Mocha 3 and Chai 3 replaced with [Vitest](https://vitest.dev).
 - ESLint 3 with `eslint-config-airbnb` replaced with ESLint's flat config,
   typescript-eslint and Prettier.
-- GitHub Actions run lint, typecheck, tests on Node 20, 22 and 24, a build, and
-  `publint` plus `arethetypeswrong` on every push; releases publish with npm
-  provenance.
+- GitHub Actions run lint, typecheck, tests, a build, and `publint` plus
+  `arethetypeswrong` on every push. The packed tarball is then installed into a
+  scratch project and smoke-tested on every Node version in `engines`, so the
+  artifact that users actually consume is verified rather than assumed. Releases
+  publish with npm provenance.
 - `npm install` works again. The 1.x `prepublish` hook ran on install and failed.
 
 ## 1.0.0
