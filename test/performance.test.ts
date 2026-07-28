@@ -33,4 +33,15 @@ describe('performance', () => {
     const input = `${'`c` '.repeat(5000)}end`
     expect(() => escapeForSlackWithMarkdown(input)).not.toThrow()
   })
+
+  it('does not scan the whole text once per window for an absent delimiter', () => {
+    // Inline code splits the text into one window per span, and a pass that finds
+    // nothing still had to scan to the end of the text for every one of them. The
+    // bound is loose because it is checked on shared CI machines; the point is
+    // that the cost stays far below the ~500ms this took beforehand.
+    const input = `${'`c` '.repeat(2000)}end`
+    const started = performance.now()
+    escapeForSlackWithMarkdown(input)
+    expect(performance.now() - started).toBeLessThan(200)
+  })
 })
