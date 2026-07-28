@@ -149,23 +149,34 @@ describe('markdown', () => {
 
     /*
      * A single underscore between spaces satisfies both the opening and the
-     * closing pattern from the same character, so the two matches overlap. 1.x
-     * emits an empty italics span for it and, because it then advances its window
-     * bounds by one character less than the text actually grew, every later pass
-     * sees bounds that no longer line up with the text. The visible effect is that
-     * a block quote containing a lone underscore is not rendered as one at all.
-     *
-     * Recorded here because it is inherited behavior rather than something aimed
-     * at, and because a change to the offset arithmetic silently alters it.
+     * closing pattern from the same character, so the matches overlap and three
+     * characters are consumed where the delimiters alone account for four. Up to
+     * 2.0.1 the window bounds were advanced by that predicted four, which left
+     * them a character behind the text for every later pass. The visible effect
+     * was that a block quote containing a lone underscore did not render as one.
      */
-    it('renders a lone italics delimiter as an empty span, suppressing an enclosing block quote', () => {
+    it('renders a lone italics delimiter as an empty span', () => {
       expect(escapeForSlackWithMarkdown('a _ b')).toBe('a <span class="slack_italics"></span> b')
+    })
+
+    it('renders a block quote containing a lone italics delimiter', () => {
       expect(escapeForSlackWithMarkdown('&gt;&gt;&gt;a _ b')).toBe(
-        '&gt;&gt;&gt;a <span class="slack_italics"></span> b'
+        '<div class="slack_block">a <span class="slack_italics"></span> b</div>'
       )
-      // Without the lone underscore the same input is a block quote.
+      expect(escapeForSlackWithMarkdown('&gt;a _ b')).toBe(
+        '<span class="slack_block">a <span class="slack_italics"></span> b</span>'
+      )
+      // The same input without the lone underscore, which always worked.
       expect(escapeForSlackWithMarkdown('&gt;&gt;&gt;a b')).toBe(
         '<div class="slack_block">a b</div>'
+      )
+    })
+
+    it('does not leave the delimiters of a block quote in the output', () => {
+      // The failed triple match fell through to the single delimiter pass, which
+      // consumed one `&gt;` and left the other two behind as text.
+      expect(escapeForSlackWithMarkdown('&gt;&gt;&gt;quoted\t_')).toBe(
+        '<div class="slack_block">quoted\t<span class="slack_italics"></span></div>'
       )
     })
   })
