@@ -44,6 +44,8 @@
   "scripts": {
     "build": "tsdown",
     "generate-emoji": "tsx scripts/generateEmoji.ts",
+    "fuzz:capture": "tsx scripts/differentialFuzz.ts capture",
+    "fuzz:compare": "tsx scripts/differentialFuzz.ts compare",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",

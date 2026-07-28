@@ -146,5 +146,27 @@ describe('markdown', () => {
     it('leaves a lone code delimiter alone', () => {
       expect(escapeForSlackWithMarkdown('unmatched `code')).toBe('unmatched `code')
     })
+
+    /*
+     * A single underscore between spaces satisfies both the opening and the
+     * closing pattern from the same character, so the two matches overlap. 1.x
+     * emits an empty italics span for it and, because it then advances its window
+     * bounds by one character less than the text actually grew, every later pass
+     * sees bounds that no longer line up with the text. The visible effect is that
+     * a block quote containing a lone underscore is not rendered as one at all.
+     *
+     * Recorded here because it is inherited behavior rather than something aimed
+     * at, and because a change to the offset arithmetic silently alters it.
+     */
+    it('renders a lone italics delimiter as an empty span, suppressing an enclosing block quote', () => {
+      expect(escapeForSlackWithMarkdown('a _ b')).toBe('a <span class="slack_italics"></span> b')
+      expect(escapeForSlackWithMarkdown('&gt;&gt;&gt;a _ b')).toBe(
+        '&gt;&gt;&gt;a <span class="slack_italics"></span> b'
+      )
+      // Without the lone underscore the same input is a block quote.
+      expect(escapeForSlackWithMarkdown('&gt;&gt;&gt;a b')).toBe(
+        '<div class="slack_block">a b</div>'
+      )
+    })
   })
 })
