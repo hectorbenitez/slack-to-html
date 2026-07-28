@@ -44,4 +44,15 @@ describe('performance', () => {
     escapeForSlackWithMarkdown(input)
     expect(performance.now() - started).toBeLessThan(200)
   })
+
+  it('does not cost time proportional to the text for every delimiter pair', () => {
+    // 8,000 spans took about 2.8s while the text was rebuilt around every pair,
+    // and 16,000 took 13s. Both are well inside this bound once the text is
+    // assembled once per pass, and the bound is loose enough for shared CI
+    // machines while still failing if the quadratic behavior returns.
+    const input = `${'`c` '.repeat(16000)}end`
+    const started = performance.now()
+    escapeForSlackWithMarkdown(input)
+    expect(performance.now() - started).toBeLessThan(1000)
+  })
 })

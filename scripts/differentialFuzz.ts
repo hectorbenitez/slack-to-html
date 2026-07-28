@@ -20,8 +20,8 @@ import { join } from 'node:path'
 import { escapeForSlackWithMarkdown } from '../src/index.js'
 
 const REFERENCE_PATH = join(tmpdir(), 'slack-to-html-fuzz-reference.json')
-const CASE_COUNT = 4000
-const SEED = 20260728
+const CASE_COUNT = Number(process.env.FUZZ_CASES ?? 4000)
+const SEED = Number(process.env.FUZZ_SEED ?? 20260728)
 
 /** Deterministic PRNG, so both runs generate byte-identical inputs. */
 const mulberry32 = (seed: number) => () => {
@@ -103,14 +103,14 @@ if (process.argv[2] === 'capture') {
   writeFileSync(REFERENCE_PATH, JSON.stringify({ seed: SEED, inputs, outputs }), 'utf8')
   console.log(`Captured ${inputs.length} cases to ${REFERENCE_PATH}`)
 } else {
-  let reference: { inputs: string[]; outputs: string[] }
+  let reference: { seed: number; inputs: string[]; outputs: string[] }
   try {
     reference = JSON.parse(readFileSync(REFERENCE_PATH, 'utf8')) as typeof reference
   } catch {
     console.error(`No reference at ${REFERENCE_PATH}. Run "npm run fuzz:capture" first.`)
     process.exit(1)
   }
-  if (reference.inputs.length !== inputs.length) {
+  if (reference.inputs.length !== inputs.length || reference.seed !== SEED) {
     console.error('Reference was captured with different settings; recapture it.')
     process.exit(1)
   }

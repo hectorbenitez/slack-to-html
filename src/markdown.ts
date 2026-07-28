@@ -33,11 +33,53 @@ interface ReplaceOptions {
   maxReplacements?: number
 }
 
-const incrementWindows = (windows: TagWindow[], offset: number): void => {
-  windows.forEach((tagWindow) => {
-    tagWindow[0] += offset
-    tagWindow[1] += offset
-  })
+/** A region of the text to rewrite, in the coordinates of the text read. */
+interface Replacement {
+  start: number
+  end: number
+  text: string
+}
+
+const applyReplacements = (text: string, replacements: Replacement[]): string => {
+  if (replacements.length === 0) {
+    return text
+  }
+  const parts: string[] = []
+  let position = 0
+  for (const replacement of replacements) {
+    parts.push(text.slice(position, replacement.start), replacement.text)
+    position = replacement.end
+  }
+  parts.push(text.slice(position))
+  return parts.join('')
+}
+
+/**
+ * Moves window bounds into the coordinates of the replaced text. A bound shifts
+ * by every replacement beginning before it, which holds a window truncated at a
+ * replacement's start in place while moving one that resumes after it.
+ *
+ * Replacements and windows are both in increasing order and windows never
+ * overlap, so the bounds are visited in increasing order and the replacements can
+ * be consumed in a single pass.
+ */
+const translateWindows = (windows: TagWindow[], replacements: Replacement[]): void => {
+  if (replacements.length === 0) {
+    return
+  }
+  let replacementIndex = 0
+  let shift = 0
+  for (const tagWindow of windows) {
+    for (const bound of [0, 1] as const) {
+      let pending = replacements[replacementIndex]
+      while (pending && pending.start < tagWindow[bound]) {
+        shift += pending.text.length - (pending.end - pending.start)
+        replacementIndex += 1
+        pending = replacements[replacementIndex]
+      }
+      tagWindow[bound] += shift
+    }
+  }
 }
 
 const replaceInWindows = (
@@ -68,7 +110,27 @@ const replaceInWindows = (
     ? buildClosingDelimiterRegExp(asymmetric, { escapeDelimiter: false })
     : buildClosingDelimiterRegExp(delimiterLiteral, { spacePadded })
 
-  let currentText = text
+  /*
+   * The text is read as it was received and rewritten once at the end, rather
+   * than rebuilt around every delimiter pair. This is safe because scanning
+   * always resumes at or after the end of the pair just matched, so no region
+   * still to be read is ever rewritten beforehand. Rebuilding in place cost time
+   * proportional to the length of the whole text for every pair, which on a text
+   * with many pairs outweighed everything else the pass does.
+   *
+   * Every position therefore stays in the coordinates of the text received,
+   * including the window bounds, which are moved into the coordinates of the
+   * result once the pass is finished. Keeping one coordinate system is also what
+   * fixes overlapping delimiter matches: the bounds used to be advanced by a
+   * predicted length change that was wrong when the opening and closing matches
+   * shared a character, leaving them out of step with the text for later passes.
+   */
+  const replacements: Replacement[] = []
+  const finish = (): ExpandedText => {
+    translateWindows(closedTagWindows, replacements)
+    return { text: applyReplacements(text, replacements), windows: closedTagWindows }
+  }
+
   let tagWindowIndex = 0
   let tagWindowOffset = 0
 
@@ -81,7 +143,7 @@ const replaceInWindows = (
    * Reuse is sound because `lastScan.match` is the first match at or after
    * `lastScan.from`: for any position in `[lastScan.from, lastScan.match.index]`
    * the answer is the same match, and a null result means there is no match after
-   * that position at all. The cache is dropped whenever the text changes.
+   * that position at all.
    */
   let lastScan: { from: number; match: RegExpExecArray | null } | null = null
 
@@ -89,7 +151,7 @@ const replaceInWindows = (
     if (lastScan && lastScan.from <= from && (!lastScan.match || lastScan.match.index >= from)) {
       return lastScan.match
     }
-    const match = execFrom(currentText, openingDelimiterRegExp, from)
+    const match = execFrom(text, openingDelimiterRegExp, from)
     lastScan = { from, match }
     return match
   }
@@ -99,7 +161,7 @@ const replaceInWindows = (
     // `maxReplacements: n` permits n + 1 replacements. Preserved from 1.x.
     const exhausted = maxReplacements !== undefined && maxReplacements < 0
     if (tagWindowIndex >= closedTagWindows.length || exhausted) {
-      return { text: currentText, windows: closedTagWindows }
+      return finish()
     }
 
     const currentClosedTagWindow = closedTagWindows[tagWindowIndex] as TagWindow
@@ -121,24 +183,24 @@ const replaceInWindows = (
       const closingDelimiterLength = asymmetric ? 0 : delimiterLiteral.length
       // Allow matching the end of the string if on the last window.
       const lastWindow =
-        tagWindowIndex === closedTagWindows.length - 1 && tagWindowEndIndex === currentText.length
+        tagWindowIndex === closedTagWindows.length - 1 && tagWindowEndIndex === text.length
       const closingMatchMaxIndex =
         (lastWindow ? tagWindowEndIndex + 1 : tagWindowEndIndex) - closingDelimiterLength + 1
 
       // Look ahead at the next index to greedily capture as much inside the
       // delimiters as possible.
       let closingMatch = execFrom(
-        currentText,
+        text,
         closingDelimiterRegExp,
         openingMatch.index + delimiterLiteral.length
       )
       let nextClosingMatch =
-        closingMatch && execFrom(currentText, closingDelimiterRegExp, closingMatch.index + 1)
+        closingMatch && execFrom(text, closingDelimiterRegExp, closingMatch.index + 1)
       while (closingMatch && nextClosingMatch) {
         // If the next match is still in the window and there is no whitespace in
         // between the two, use the later one.
         const nextWhitespace = execFrom(
-          currentText,
+          text,
           whitespaceRegExp,
           closingMatch.index + delimiterLiteral.length
         )
@@ -147,13 +209,11 @@ const replaceInWindows = (
           break
         }
         closingMatch = nextClosingMatch
-        nextClosingMatch = execFrom(currentText, closingDelimiterRegExp, closingMatch.index + 1)
+        nextClosingMatch = execFrom(text, closingDelimiterRegExp, closingMatch.index + 1)
       }
 
       if (closingMatch && closingMatch.index < closingMatchMaxIndex) {
         const afterDelimitersIndex = closingMatch.index + closingMatch[0].length
-        const textBeforeDelimiter = currentText.slice(0, openingMatch.index)
-        const textAfterDelimiter = currentText.slice(afterDelimitersIndex)
 
         const openingWhitespace = spacePadded
           ? (openingMatch.groups?.openingCapturedWhitespace ?? '')
@@ -166,7 +226,7 @@ const replaceInWindows = (
           asymmetric ? closingMatch[0] : ''
         }`
 
-        const textBetweenDelimiters = currentText.slice(
+        const textBetweenDelimiters = text.slice(
           openingMatch.index + openingMatch[0].length,
           closingMatch.index
         )
@@ -176,39 +236,29 @@ const replaceInWindows = (
 
         const replacedDelimiterText = `${openingReplacementString}${replacedTextBetweenDelimiters}${closingReplacementString}`
 
-        const delimiterReplacementLength = delimiterLiteral.length + closingDelimiterLength
-        const windowOffset =
-          replacementOpeningLiteral.length +
-          replacementClosingLiteral.length -
-          delimiterReplacementLength +
-          replacedTextBetweenDelimiters.length -
-          textBetweenDelimiters.length
-        const newUpperWindowLimit = tagWindowEndIndex + windowOffset
-
         const nextWindowIndex = partitionWindowOnMatch ? tagWindowIndex + 1 : tagWindowIndex
-        const nextTagWindowOffset = partitionWindowOnMatch
-          ? 0
-          : afterDelimitersIndex + windowOffset - tagWindowStartIndex + 1
 
         if (partitionWindowOnMatch) {
           // Split the current window into two around the delimiter pair.
           currentClosedTagWindow[1] = openingMatch.index
           closedTagWindows.splice(nextWindowIndex, 0, [
-            closingMatch.index + closingDelimiterLength + windowOffset,
-            newUpperWindowLimit,
+            closingMatch.index + closingDelimiterLength,
+            tagWindowEndIndex,
           ])
-        } else {
-          currentClosedTagWindow[1] = newUpperWindowLimit
         }
-        incrementWindows(closedTagWindows.slice(nextWindowIndex + 1), windowOffset)
         if (maxReplacements !== undefined) {
           maxReplacements -= 1
         }
 
-        currentText = `${textBeforeDelimiter}${replacedDelimiterText}${textAfterDelimiter}`
-        lastScan = null
+        replacements.push({
+          start: openingMatch.index,
+          end: afterDelimitersIndex,
+          text: replacedDelimiterText,
+        })
         tagWindowIndex = nextWindowIndex
-        tagWindowOffset = nextTagWindowOffset
+        tagWindowOffset = partitionWindowOnMatch
+          ? 0
+          : afterDelimitersIndex + 1 - tagWindowStartIndex
         continue
       }
     }

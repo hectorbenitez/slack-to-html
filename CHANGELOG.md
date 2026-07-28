@@ -3,6 +3,32 @@
 All notable changes to this project are documented here. This project follows
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 2.1.0
+
+### Fixed
+
+- A block quote containing a lone `_` renders as a block quote again. A single
+  underscore between spaces satisfies both the opening and the closing italics
+  pattern from the same character, so the matches overlap and three characters are
+  consumed where the delimiters alone account for four. The window bounds were
+  advanced by that predicted four, which left them a character behind the text for
+  every later pass, and the block quote pass then rejected its own closing match.
+  Inherited from 1.x.
+- The extra delimiters of a block quote are no longer left in the output in that
+  case. The failed triple match fell through to the single delimiter pass, which
+  consumed one `&gt;` and rendered the other two as text.
+
+If you depend on the previous rendering of a lone `_`, note that it is otherwise
+unchanged: it still produces an empty italics span.
+
+### Performance
+
+- A pass now reads the text as it was received, collects its replacements and
+  assembles the result once, instead of rebuilding the whole text around every
+  delimiter pair. Rebuilding cost time proportional to the length of the text for
+  every pair. On a message of 16,000 inline code spans this drops from 13s to
+  33ms; on 4,000, from 456ms to 8ms.
+
 ## 2.0.1
 
 No change in output. Verified byte-identical to 2.0.0 over the golden corpus and
