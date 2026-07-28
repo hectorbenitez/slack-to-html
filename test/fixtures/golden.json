@@ -1,0 +1,703 @@
+[
+  {
+    "group": "empty",
+    "input": "",
+    "inputIsUndefined": false,
+    "options": null,
+    "output": ""
+  },
+  {
+    "group": "empty",
+    "input": null,
+    "inputIsUndefined": false,
+    "options": null,
+    "output": ""
+  },
+  {
+    "group": "empty",
+    "input": null,
+    "inputIsUndefined": true,
+    "options": null,
+    "output": ""
+  },
+  {
+    "group": "plain",
+    "input": "hello world",
+    "inputIsUndefined": false,
+    "options": null,
+    "output": "hello world"
+  },
+  {
+    "group": "plain",
+    "input": "a & b",
+    "inputIsUndefined": false,
+    "options": null,
+    "output": "a & b"
+  },
+  {
+    "group": "plain",
+    "input": "already &amp; escaped",
+    "inputIsUndefined": false,
+    "options": null,
+    "output": "already &amp; escaped"
+  },
+  {
+    "group": "plain",
+    "input": "multi\nline\ntext",
+    "inputIsUndefined": false,
+    "options": null,
+    "output": "multi\nline\ntext"
+  },
+  {
+    "group": "userMention",
+    "input": "<@U123|someone>",
+    "inputIsUndefined": false,
+    "options": null,
+    "output": "<span class=\"user-mention\">@someone</span>"
+  },
+  {
+    "group": "userMention",
+    "input": "<@U123>",
+    "inputIsUndefined": false,
+    "options": {
+      "users": {
+        "U123": "someone",
+        "U456": "another"
+      }
+    },
+    "output": "<span class=\"user-mention\">@someone</span>"
+  },
+  {
+    "group": "userMention",
+    "input": "<@U123>",
+    "inputIsUndefined": false,
+    "options": null,
+    "output": "&lt;@U123&gt;"
+  },
+  {
+    "group": "userMention",
+    "input": "<@someone>",
+    "inputIsUndefined": false,
+    "options": null,
+    "output": "<span class=\"user-mention\">@someone</span>"
+  },
+  {
+    "group": "userMention",
+    "input": "<@U123> and <@U456>",
+    "inputIsUndefined": false,
+    "options": {
+      "users": {
+        "U123": "someone",
+        "U456": "another"
+      }
+    },
+    "output": "<span class=\"user-mention\">@someone</span> and <span class=\"user-mention\">@another</span>"
+  },
+  {
+    "group": "channelMention",
+    "input": "<#C123|channel>",
+    "inputIsUndefined": false,
+    "options": null,
+    "output": "#channel"
+  },
+  {
+    "group": "channelMention",
+    "input": "<#C123>",
+    "inputIsUndefined": false,
+    "options": {
+      "channels": {
+        "C123": "channel"
+      }
+    },
+    "output": "#channel"
+  },
+  {
+    "group": "channelMention",
+    "input": "<#C123>",
+    "inputIsUndefined": false,
+    "options": null,
+    "output": "&lt;#C123&gt;"
+  },
+  {
+    "group": "channelMention",
+    "input": "<#channel>",
+    "inputIsUndefined": false,
+    "options": null,
+    "output": "#channel"
+  },
+  {
+    "group": "link",
+    "input": "<https://swiftype.com>",
+    "inputIsUndefined": false,
+    "options": null,
+    "output": "<a href=\"https://swiftype.com\" target=\"_blank\" rel=\"noopener noreferrer\">https://swiftype.com</a>"
+  },
+  {
+    "group": "link",
+    "input": "<https://swiftype.com|Swiftype>",
+    "inputIsUndefined": false,
+    "options": null,
+    "output": "<a href=\"https://swiftype.com\" target=\"_blank\" rel=\"noopener noreferrer\">Swiftype</a>"
+  },
+  {
+    "group": "link",
+    "input": "<http://example.com/a/b?c=d&e=f>",
+    "inputIsUndefined": false,
+    "options": null,
+    "output": "<a href=\"http://example.com/a/b?c=d&e=f\" target=\"_blank\" rel=\"noopener noreferrer\">http://example.com/a/b?c=d&e=f</a>"
+  },
+  {
+    "group": "link",
+    "input": "bare https://example.com url",
+    "inputIsUndefined": false,
+    "options": null,
+    "output": "bare https://example.com url"
+  },
+  {
+    "group": "mailto",
+    "input": "<mailto:test@swiftype.com>",
+    "inputIsUndefined": false,
+    "options": null,
+    "output": "<a href=\"mailto:test@swiftype.com\" target=\"_blank\" rel=\"noopener noreferrer\">test@swiftype.com</a>"
+  },
+  {
+    "group": "mailto",
+    "input": "<mailto:test@swiftype.com|Test>",
+    "inputIsUndefined": false,
+    "options": null,
+    "output": "<a href=\"mailto:test@swiftype.com\" target=\"_blank\" rel=\"noopener noreferrer\">Test</a>"
+  },
+  {
+    "group": "tel",
+    "input": "<tel:123-456-7890>",
+    "inputIsUndefined": false,
+    "options": null,
+    "output": "<a href=\"tel:123-456-7890\">123-456-7890</a>"
+  },
+  {
+    "group": "tel",
+    "input": "<tel:123-456-7890|Call me!>",
+    "inputIsUndefined": false,
+    "options": null,
+    "output": "<a href=\"tel:123-456-7890\">Call me!</a>"
+  },
+  {
+    "group": "subteam",
+    "input": "<!subteam^S123|swiftype-eng>",
+    "inputIsUndefined": false,
+    "options": null,
+    "output": "swiftype-eng"
+  },
+  {
+    "group": "subteam",
+    "input": "<!subteam^S123>",
+    "inputIsUndefined": false,
+    "options": {
+      "usergroups": {
+        "S123": "swiftype-eng"
+      }
+    },
+    "output": "swiftype-eng"
+  },
+  {
+    "group": "subteam",
+    "input": "<!subteam^S123>",
+    "inputIsUndefined": false,
+    "options": null,
+    "output": "&lt;!subteam^S123&gt;"
+  },
+  {
+    "group": "command",
+    "input": "<!here>",
+    "inputIsUndefined": false,
+    "options": null,
+    "output": "@here"
+  },
+  {
+    "group": "command",
+    "input": "<!channel>",
+    "inputIsUndefined": false,
+    "options": null,
+    "output": "@channel"
+  },
+  {
+    "group": "command",
+    "input": "<!group>",
+    "inputIsUndefined": false,
+    "options": null,
+    "output": "@group"
+  },
+  {
+    "group": "command",
+    "input": "<!everyone>",
+    "inputIsUndefined": false,
+    "options": null,
+    "output": "@everyone"
+  },
+  {
+    "group": "command",
+    "input": "<!here|@here>",
+    "inputIsUndefined": false,
+    "options": null,
+    "output": "@here"
+  },
+  {
+    "group": "command",
+    "input": "<!foo|bar>",
+    "inputIsUndefined": false,
+    "options": null,
+    "output": "<bar>"
+  },
+  {
+    "group": "command",
+    "input": "<!foo>",
+    "inputIsUndefined": false,
+    "options": null,
+    "output": "<foo>"
+  },
+  {
+    "group": "emoji",
+    "input": ":wave:",
+    "inputIsUndefined": false,
+    "options": null,
+    "output": "<span title=\":wave:\">&#x1F44B;</span>"
+  },
+  {
+    "group": "emoji",
+    "input": ":wave: :wave:",
+    "inputIsUndefined": false,
+    "options": null,
+    "output": "<span title=\":wave:\">&#x1F44B;</span> <span title=\":wave:\">&#x1F44B;</span>"
+  },
+  {
+    "group": "emoji",
+    "input": ":wave::wave:",
+    "inputIsUndefined": false,
+    "options": null,
+    "output": "<span title=\":wave:\">&#x1F44B;</span><span title=\":wave:\">&#x1F44B;</span>"
+  },
+  {
+    "group": "emoji",
+    "input": ":+1:",
+    "inputIsUndefined": false,
+    "options": null,
+    "output": "<span title=\":+1:\">&#x1F44D;</span>"
+  },
+  {
+    "group": "emoji",
+    "input": ":flag-mx:",
+    "inputIsUndefined": false,
+    "options": null,
+    "output": "<span title=\":flag-mx:\">&#x1F1F2;&#x1F1FD;</span>"
+  },
+  {
+    "group": "emoji",
+    "input": "text :wave: more text",
+    "inputIsUndefined": false,
+    "options": null,
+    "output": "text <span title=\":wave:\">&#x1F44B;</span> more text"
+  },
+  {
+    "group": "emoji",
+    "input": ":swiftype:",
+    "inputIsUndefined": false,
+    "options": {
+      "customEmoji": {
+        "swiftype": "https://swiftype.com/favicon.ico",
+        "goodbye": "alias:wave",
+        "facepalm": "http://emojis.slackmojis.com/emojis/images/1450319441/51/facepalm.png"
+      }
+    },
+    "output": "<img alt=\"swiftype\" src=\"https://swiftype.com/favicon.ico\" title=\":swiftype:\" class=\"slack_emoji\" />"
+  },
+  {
+    "group": "emoji",
+    "input": ":goodbye:",
+    "inputIsUndefined": false,
+    "options": {
+      "customEmoji": {
+        "swiftype": "https://swiftype.com/favicon.ico",
+        "goodbye": "alias:wave",
+        "facepalm": "http://emojis.slackmojis.com/emojis/images/1450319441/51/facepalm.png"
+      }
+    },
+    "output": "<span title=\":goodbye:\">&#x1F44B;</span>"
+  },
+  {
+    "group": "emoji",
+    "input": ":swiftype: :goodbye:",
+    "inputIsUndefined": false,
+    "options": {
+      "customEmoji": {
+        "swiftype": "https://swiftype.com/favicon.ico",
+        "goodbye": "alias:wave",
+        "facepalm": "http://emojis.slackmojis.com/emojis/images/1450319441/51/facepalm.png"
+      }
+    },
+    "output": "<img alt=\"swiftype\" src=\"https://swiftype.com/favicon.ico\" title=\":swiftype:\" class=\"slack_emoji\" /> <span title=\":goodbye:\">&#x1F44B;</span>"
+  },
+  {
+    "group": "emoji",
+    "input": ":swiftype::goodbye:",
+    "inputIsUndefined": false,
+    "options": {
+      "customEmoji": {
+        "swiftype": "https://swiftype.com/favicon.ico",
+        "goodbye": "alias:wave",
+        "facepalm": "http://emojis.slackmojis.com/emojis/images/1450319441/51/facepalm.png"
+      }
+    },
+    "output": "<img alt=\"swiftype\" src=\"https://swiftype.com/favicon.ico\" title=\":swiftype:\" class=\"slack_emoji\" /><span title=\":goodbye:\">&#x1F44B;</span>"
+  },
+  {
+    "group": "markdown-codeBlock",
+    "input": "```this is a code multiline```",
+    "inputIsUndefined": false,
+    "options": {
+      "markdown": true
+    },
+    "output": "<div class=\"slack_code\"><code>this is a code multiline</code></div>"
+  },
+  {
+    "group": "markdown-codeBlock",
+    "input": "```this is a code multiline\nwith newlines```",
+    "inputIsUndefined": false,
+    "options": {
+      "markdown": true
+    },
+    "output": "<div class=\"slack_code\"><code>this is a code multiline<br>with newlines</code></div>"
+  },
+  {
+    "group": "markdown-codeBlock",
+    "input": "````this is a code multiline with backticks````",
+    "inputIsUndefined": false,
+    "options": {
+      "markdown": true
+    },
+    "output": "<div class=\"slack_code\"><code>`this is a code multiline with backticks`</code></div>"
+  },
+  {
+    "group": "markdown-codeBlock",
+    "input": "```one``` ```two```",
+    "inputIsUndefined": false,
+    "options": {
+      "markdown": true
+    },
+    "output": "<div class=\"slack_code\"><code>one</code></div> <div class=\"slack_code\"><code>two</code></div>"
+  },
+  {
+    "group": "markdown-codeBlock",
+    "input": "```code with *asterisks*```",
+    "inputIsUndefined": false,
+    "options": {
+      "markdown": true
+    },
+    "output": "<div class=\"slack_code\"><code>code with *asterisks*</code></div>"
+  },
+  {
+    "group": "markdown-codeBlock",
+    "input": "```code``` with *bold* after",
+    "inputIsUndefined": false,
+    "options": {
+      "markdown": true
+    },
+    "output": "<div class=\"slack_code\"><code>code</code></div> with <span class=\"slack_bold\">bold</span> after"
+  },
+  {
+    "group": "markdown-codeInline",
+    "input": "`inline code`",
+    "inputIsUndefined": false,
+    "options": {
+      "markdown": true
+    },
+    "output": "<span class=\"slack_code\"><code>inline code</code></span>"
+  },
+  {
+    "group": "markdown-codeInline",
+    "input": "`one` and `two`",
+    "inputIsUndefined": false,
+    "options": {
+      "markdown": true
+    },
+    "output": "<span class=\"slack_code\"><code>one</code></span> and <span class=\"slack_code\"><code>two</code></span>"
+  },
+  {
+    "group": "markdown-codeInline",
+    "input": "`code with *asterisks*`",
+    "inputIsUndefined": false,
+    "options": {
+      "markdown": true
+    },
+    "output": "<span class=\"slack_code\"><code>code with *asterisks*</code></span>"
+  },
+  {
+    "group": "markdown-bold",
+    "input": "this is *bold*",
+    "inputIsUndefined": false,
+    "options": {
+      "markdown": true
+    },
+    "output": "this is <span class=\"slack_bold\">bold</span>"
+  },
+  {
+    "group": "markdown-bold",
+    "input": "this is *bold*with*more*asterisks*",
+    "inputIsUndefined": false,
+    "options": {
+      "markdown": true
+    },
+    "output": "this is <span class=\"slack_bold\">bold*with*more*asterisks</span>"
+  },
+  {
+    "group": "markdown-italic",
+    "input": "this is _italic_",
+    "inputIsUndefined": false,
+    "options": {
+      "markdown": true
+    },
+    "output": "this is <span class=\"slack_italics\">italic</span>"
+  },
+  {
+    "group": "markdown-italic",
+    "input": "_italic_ at the start",
+    "inputIsUndefined": false,
+    "options": {
+      "markdown": true
+    },
+    "output": "<span class=\"slack_italics\">italic</span> at the start"
+  },
+  {
+    "group": "markdown-italic",
+    "input": "snake_case_word",
+    "inputIsUndefined": false,
+    "options": {
+      "markdown": true
+    },
+    "output": "snake_case_word"
+  },
+  {
+    "group": "markdown-strike",
+    "input": "this is ~struck~",
+    "inputIsUndefined": false,
+    "options": {
+      "markdown": true
+    },
+    "output": "this is <span class=\"slack_strikethrough\">struck</span>"
+  },
+  {
+    "group": "markdown-blockQuote",
+    "input": "&gt;&gt;&gt;this is a block quote",
+    "inputIsUndefined": false,
+    "options": {
+      "markdown": true
+    },
+    "output": "<div class=\"slack_block\">this is a block quote</div>"
+  },
+  {
+    "group": "markdown-blockQuote",
+    "input": "&gt;&gt;&gt;block quote\nwith newlines",
+    "inputIsUndefined": false,
+    "options": {
+      "markdown": true
+    },
+    "output": "<div class=\"slack_block\">block quote<br>with newlines</div>"
+  },
+  {
+    "group": "markdown-blockQuote",
+    "input": "not whitespace &gt;&gt;&gt;not a block quote",
+    "inputIsUndefined": false,
+    "options": {
+      "markdown": true
+    },
+    "output": "not whitespace &gt;&gt;&gt;not a block quote"
+  },
+  {
+    "group": "markdown-inlineQuote",
+    "input": "&gt;inline quote",
+    "inputIsUndefined": false,
+    "options": {
+      "markdown": true
+    },
+    "output": "<span class=\"slack_block\">inline quote</span>"
+  },
+  {
+    "group": "markdown-inlineQuote",
+    "input": "  \t   &gt;inline quote",
+    "inputIsUndefined": false,
+    "options": {
+      "markdown": true
+    },
+    "output": "<span class=\"slack_block\">inline quote</span>"
+  },
+  {
+    "group": "markdown-inlineQuote",
+    "input": "not whitespace &gt;not a quote",
+    "inputIsUndefined": false,
+    "options": {
+      "markdown": true
+    },
+    "output": "not whitespace &gt;not a quote"
+  },
+  {
+    "group": "markdown-inlineQuote",
+    "input": "&gt;quote line\nnormal line",
+    "inputIsUndefined": false,
+    "options": {
+      "markdown": true
+    },
+    "output": "<span class=\"slack_block\">quote line</span>\nnormal line"
+  },
+  {
+    "group": "markdown-combined",
+    "input": "*bold* _italic_ ~struck~ `code`",
+    "inputIsUndefined": false,
+    "options": {
+      "markdown": true
+    },
+    "output": "<span class=\"slack_bold\">bold</span> <span class=\"slack_italics\">italic</span> <span class=\"slack_strikethrough\">struck</span> <span class=\"slack_code\"><code>code</code></span>"
+  },
+  {
+    "group": "markdown-combined",
+    "input": "*_bold italic_*",
+    "inputIsUndefined": false,
+    "options": {
+      "markdown": true
+    },
+    "output": "<span class=\"slack_bold\">_bold italic_</span>"
+  },
+  {
+    "group": "markdown-combined",
+    "input": "<@U123> said *hello* :wave:",
+    "inputIsUndefined": false,
+    "options": {
+      "markdown": true,
+      "customEmoji": {
+        "swiftype": "https://swiftype.com/favicon.ico",
+        "goodbye": "alias:wave",
+        "facepalm": "http://emojis.slackmojis.com/emojis/images/1450319441/51/facepalm.png"
+      },
+      "users": {
+        "U123": "someone",
+        "U456": "another"
+      },
+      "channels": {
+        "C123": "channel"
+      },
+      "usergroups": {
+        "S123": "swiftype-eng"
+      }
+    },
+    "output": "<span class=\"user-mention\">@someone</span> said <span class=\"slack_bold\">hello</span> <span title=\":wave:\">&#x1F44B;</span>"
+  },
+  {
+    "group": "markdown-combined",
+    "input": "&gt;&gt;&gt;quote with *bold* and :wave:",
+    "inputIsUndefined": false,
+    "options": {
+      "markdown": true,
+      "customEmoji": {
+        "swiftype": "https://swiftype.com/favicon.ico",
+        "goodbye": "alias:wave",
+        "facepalm": "http://emojis.slackmojis.com/emojis/images/1450319441/51/facepalm.png"
+      },
+      "users": {
+        "U123": "someone",
+        "U456": "another"
+      },
+      "channels": {
+        "C123": "channel"
+      },
+      "usergroups": {
+        "S123": "swiftype-eng"
+      }
+    },
+    "output": "<div class=\"slack_block\">quote with <span class=\"slack_bold\">bold</span> and <span title=\":wave:\">&#x1F44B;</span></div>"
+  },
+  {
+    "group": "unmatchedDelimiter",
+    "input": "unmatched *bold",
+    "inputIsUndefined": false,
+    "options": {
+      "markdown": true
+    },
+    "output": "unmatched *bold"
+  },
+  {
+    "group": "unmatchedDelimiter",
+    "input": "unmatched `code",
+    "inputIsUndefined": false,
+    "options": {
+      "markdown": true
+    },
+    "output": "unmatched `code"
+  },
+  {
+    "group": "unmatchedDelimiter",
+    "input": "unmatched ```block",
+    "inputIsUndefined": false,
+    "options": {
+      "markdown": true
+    },
+    "output": "unmatched <span class=\"slack_code\"><code>`</code></span>block"
+  },
+  {
+    "group": "knownBug-issue1-urlColons",
+    "input": "https://ex.com/a#:~:text=hello%20world",
+    "inputIsUndefined": false,
+    "options": null,
+    "output": "https//ex.com/a#~:text=hello%20world"
+  },
+  {
+    "group": "knownBug-issue4-unknownEmoji",
+    "input": "hello :notanemoji: world",
+    "inputIsUndefined": false,
+    "options": null,
+    "output": "hello notanemoji world"
+  },
+  {
+    "group": "knownBug-issue4-unknownEmoji",
+    "input": ":customEmoji:",
+    "inputIsUndefined": false,
+    "options": null,
+    "output": "customEmoji"
+  },
+  {
+    "group": "knownBug-rawHtml",
+    "input": "<script>alert(1)</script>",
+    "inputIsUndefined": false,
+    "options": null,
+    "output": "<script>alert(1)</script>"
+  },
+  {
+    "group": "knownBug-rawHtml",
+    "input": "<img src=x onerror=alert(1)>",
+    "inputIsUndefined": false,
+    "options": null,
+    "output": "<img src=x onerror=alert(1)>"
+  },
+  {
+    "group": "knownBug-attrBreakout",
+    "input": ":evil:",
+    "inputIsUndefined": false,
+    "options": {
+      "customEmoji": {
+        "evil": "http://e/x.png\" onerror=\"alert(1)"
+      }
+    },
+    "output": "<img alt=\"evil\" src=\"http://e/x.png\" onerror=\"alert(1)\" title=\":evil:\" class=\"slack_emoji\" />"
+  },
+  {
+    "group": "knownBug-attrBreakout",
+    "input": "<@U1|\"><b>label</b>>",
+    "inputIsUndefined": false,
+    "options": null,
+    "output": "<span class=\"user-mention\">@\"</span><b>label</b>>"
+  },
+  {
+    "group": "knownBug-javascriptUrl",
+    "input": "<javascript:alert(1)|click me>",
+    "inputIsUndefined": false,
+    "options": null,
+    "output": "<javascript:alert(1)|click me>"
+  }
+]
