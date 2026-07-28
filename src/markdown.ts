@@ -52,6 +52,14 @@ const replaceInWindows = (
   const asymmetric = options.endingPattern
   let maxReplacements = options.maxReplacements
 
+  // An opening match always contains the delimiter literally, so a text without
+  // it cannot produce one. Worth checking up front: an earlier pass may have
+  // split the text into very many windows, each of which would otherwise be
+  // scanned separately below.
+  if (!text.includes(delimiterLiteral)) {
+    return { text, windows: closedTagWindows }
+  }
+
   const openingDelimiterRegExp = buildOpeningDelimiterRegExp(delimiterLiteral, {
     spacePadded,
     prefixPattern,
@@ -63,6 +71,28 @@ const replaceInWindows = (
   let currentText = text
   let tagWindowIndex = 0
   let tagWindowOffset = 0
+
+  /*
+   * A scan is not bounded by the window it was started for, so it can run to the
+   * end of the text and find a match belonging to a later window. Remembering the
+   * result lets the following windows reuse it instead of repeating the same scan,
+   * which is what made a text split into many windows cost quadratic time.
+   *
+   * Reuse is sound because `lastScan.match` is the first match at or after
+   * `lastScan.from`: for any position in `[lastScan.from, lastScan.match.index]`
+   * the answer is the same match, and a null result means there is no match after
+   * that position at all. The cache is dropped whenever the text changes.
+   */
+  let lastScan: { from: number; match: RegExpExecArray | null } | null = null
+
+  const findOpeningDelimiter = (from: number): RegExpExecArray | null => {
+    if (lastScan && lastScan.from <= from && (!lastScan.match || lastScan.match.index >= from)) {
+      return lastScan.match
+    }
+    const match = execFrom(currentText, openingDelimiterRegExp, from)
+    lastScan = { from, match }
+    return match
+  }
 
   for (;;) {
     // A limit of exactly 0 does not halt the loop, only a negative one does, so
@@ -85,11 +115,7 @@ const replaceInWindows = (
       continue
     }
 
-    const openingMatch = execFrom(
-      currentText,
-      openingDelimiterRegExp,
-      tagWindowStartIndex + tagWindowOffset
-    )
+    const openingMatch = findOpeningDelimiter(tagWindowStartIndex + tagWindowOffset)
 
     if (openingMatch && openingMatch.index < tagWindowEndIndex) {
       const closingDelimiterLength = asymmetric ? 0 : delimiterLiteral.length
@@ -180,6 +206,7 @@ const replaceInWindows = (
         }
 
         currentText = `${textBeforeDelimiter}${replacedDelimiterText}${textAfterDelimiter}`
+        lastScan = null
         tagWindowIndex = nextWindowIndex
         tagWindowOffset = nextTagWindowOffset
         continue
